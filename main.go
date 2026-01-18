@@ -58,10 +58,16 @@ func main() {
 	http.HandleFunc("/api/plugins/", func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path
 		switch {
-		case strings.HasSuffix(path, "/disable") && r.Method == "POST":
+		case strings.Contains(path, "/skills/") && strings.HasSuffix(path, "/disable") && r.Method == "POST":
 			h.DisablePluginSkill(w, r)
-		case strings.HasSuffix(path, "/enable") && r.Method == "POST":
+		case strings.Contains(path, "/skills/") && strings.HasSuffix(path, "/enable") && r.Method == "POST":
 			h.EnablePluginSkill(w, r)
+		case strings.HasSuffix(path, "/disable") && r.Method == "POST":
+			h.DisablePlugin(w, r)
+		case strings.HasSuffix(path, "/enable") && r.Method == "POST":
+			h.EnablePlugin(w, r)
+		case r.Method == "DELETE":
+			h.DeletePlugin(w, r)
 		default:
 			http.NotFound(w, r)
 		}

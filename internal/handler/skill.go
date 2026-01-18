@@ -164,3 +164,41 @@ func (h *SkillHandler) EnablePluginSkill(w http.ResponseWriter, r *http.Request)
 
 	w.WriteHeader(http.StatusOK)
 }
+
+func (h *SkillHandler) DisablePlugin(w http.ResponseWriter, r *http.Request) {
+	// URL format: /api/plugins/{pluginName}/disable
+	path := strings.TrimPrefix(r.URL.Path, "/api/plugins/")
+	pluginName := strings.TrimSuffix(path, "/disable")
+
+	if err := config.DisablePlugin(pluginName); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (h *SkillHandler) EnablePlugin(w http.ResponseWriter, r *http.Request) {
+	// URL format: /api/plugins/{pluginName}/enable
+	path := strings.TrimPrefix(r.URL.Path, "/api/plugins/")
+	pluginName := strings.TrimSuffix(path, "/enable")
+
+	if err := config.EnablePlugin(pluginName); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (h *SkillHandler) DeletePlugin(w http.ResponseWriter, r *http.Request) {
+	// URL format: /api/plugins/{pluginName}
+	pluginName := strings.TrimPrefix(r.URL.Path, "/api/plugins/")
+
+	if err := h.svc.DeletePlugin(pluginName); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}

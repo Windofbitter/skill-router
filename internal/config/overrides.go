@@ -4,11 +4,13 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 )
 
 type SkillOverrides struct {
-	Disabled []string `json:"disabled"`
+	Disabled        []string `json:"disabled"`
+	DisabledPlugins []string `json:"disabledPlugins"`
 }
 
 var (
@@ -26,7 +28,7 @@ func LoadOverrides() (*SkillOverrides, error) {
 
 	data, err := os.ReadFile(overridesPath)
 	if os.IsNotExist(err) {
-		return &SkillOverrides{Disabled: []string{}}, nil
+		return &SkillOverrides{Disabled: []string{}, DisabledPlugins: []string{}}, nil
 	}
 	if err != nil {
 		return nil, err
@@ -58,9 +60,31 @@ func IsPluginSkillDisabled(pluginName, skillName string) bool {
 		return false
 	}
 
+	// Check if entire plugin is disabled
+	for _, disabled := range overrides.DisabledPlugins {
+		if disabled == pluginName {
+			return true
+		}
+	}
+
+	// Check if individual skill is disabled
 	key := pluginName + ":" + skillName
 	for _, disabled := range overrides.Disabled {
 		if disabled == key {
+			return true
+		}
+	}
+	return false
+}
+
+func IsPluginDisabled(pluginName string) bool {
+	overrides, err := LoadOverrides()
+	if err != nil {
+		return false
+	}
+
+	for _, disabled := range overrides.DisabledPlugins {
+		if disabled == pluginName {
 			return true
 		}
 	}
@@ -103,5 +127,50 @@ func EnablePluginSkill(pluginName, skillName string) error {
 	}
 
 	overrides.Disabled = newDisabled
+	return SaveOverrides(overrides)
+}
+
+func DisablePlugin(pluginName string) error {
+	overrides, err := LoadOverrides()
+	if err != nil {
+		return err
+	}
+
+	// Check if already disabled
+	for _, disabled := range overrides.DisabledPlugins {
+		if disabled == pluginName {
+			return nil
+		}
+	}
+
+	overrides.DisabledPlugins = append(overrides.DisabledPlugins, pluginName)
+
+	// Also remove individual skill overrides for this plugin (they're now redundant)
+	newDisabled := make([]string, 0, len(overrides.Disabled))
+	for _, disabled := range overrides.Disabled {
+		if !strings.HasPrefix(disabled, pluginName+":") {
+			newDisabled = append(newDisabled, disabled)
+		}
+	}
+	overrides.Disabled = newDisabled
+
+	return SaveOverrides(overrides)
+}
+
+func EnablePlugin(pluginName string) error {
+	overrides, err := LoadOverrides()
+	if err != nil {
+		return err
+	}
+
+	// Remove from disabled plugins list
+	newDisabledPlugins := make([]string, 0, len(overrides.DisabledPlugins))
+	for _, disabled := range overrides.DisabledPlugins {
+		if disabled != pluginName {
+			newDisabledPlugins = append(newDisabledPlugins, disabled)
+		}
+	}
+
+	overrides.DisabledPlugins = newDisabledPlugins
 	return SaveOverrides(overrides)
 }

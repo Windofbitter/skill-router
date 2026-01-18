@@ -233,3 +233,24 @@ func (s *SkillService) SaveSkill(fileName string, content []byte, overwrite bool
 
 	return os.WriteFile(skillFile, content, 0644)
 }
+
+func (s *SkillService) DeletePlugin(pluginName string) error {
+	// Find and delete the plugin directory
+	orgs, err := os.ReadDir(s.pluginsDir)
+	if err != nil {
+		return err
+	}
+
+	for _, org := range orgs {
+		if !org.IsDir() {
+			continue
+		}
+
+		pluginPath := filepath.Join(s.pluginsDir, org.Name(), pluginName)
+		if _, err := os.Stat(pluginPath); err == nil {
+			return os.RemoveAll(pluginPath)
+		}
+	}
+
+	return fmt.Errorf("plugin not found: %s", pluginName)
+}

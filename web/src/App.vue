@@ -1,8 +1,19 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import type { Skill } from './types/skill'
-import { listSkills, enableSkill, disableSkill, deleteSkill, enablePluginSkill, disablePluginSkill } from './api/skills'
+import {
+  listSkills,
+  enableSkill,
+  disableSkill,
+  deleteSkill,
+  enablePluginSkill,
+  disablePluginSkill,
+  enablePlugin,
+  disablePlugin,
+  deletePlugin
+} from './api/skills'
 import SkillCard from './components/SkillCard.vue'
+import PluginGroup from './components/PluginGroup.vue'
 import AddSkillModal from './components/AddSkillModal.vue'
 
 const skills = ref<Skill[]>([])
@@ -33,8 +44,27 @@ const filteredSkills = computed(() => {
   })
 })
 
+const userSkills = computed(() => filteredSkills.value.filter(s => s.source === 'user'))
+const pluginSkills = computed(() => filteredSkills.value.filter(s => s.source === 'plugin'))
+
+// Group plugin skills by plugin name
+const pluginGroups = computed(() => {
+  const groups: Record<string, Skill[]> = {}
+  for (const skill of pluginSkills.value) {
+    const key = skill.pluginName || 'unknown'
+    if (!groups[key]) {
+      groups[key] = []
+    }
+    groups[key].push(skill)
+  }
+  return groups
+})
+
 const userCount = computed(() => skills.value.filter(s => s.source === 'user').length)
-const pluginCount = computed(() => skills.value.filter(s => s.source === 'plugin').length)
+const pluginGroupCount = computed(() => {
+  const names = new Set(skills.value.filter(s => s.source === 'plugin').map(s => s.pluginName))
+  return names.size
+})
 
 async function loadSkills() {
   loading.value = true
@@ -61,13 +91,29 @@ async function handleDelete(fileName: string, enabled: boolean) {
   await loadSkills()
 }
 
-async function handleEnablePlugin(pluginName: string, skillName: string) {
+async function handleEnablePluginSkill(pluginName: string, skillName: string) {
   await enablePluginSkill(pluginName, skillName)
   await loadSkills()
 }
 
-async function handleDisablePlugin(pluginName: string, skillName: string) {
+async function handleDisablePluginSkill(pluginName: string, skillName: string) {
   await disablePluginSkill(pluginName, skillName)
+  await loadSkills()
+}
+
+async function handleEnablePlugin(pluginName: string) {
+  await enablePlugin(pluginName)
+  await loadSkills()
+}
+
+async function handleDisablePlugin(pluginName: string) {
+  await disablePlugin(pluginName)
+  await loadSkills()
+}
+
+async function handleDeletePlugin(pluginName: string) {
+  if (!confirm(`Remove plugin "${pluginName}"? This will delete all its skills from the cache.`)) return
+  await deletePlugin(pluginName)
   await loadSkills()
 }
 
@@ -121,7 +167,7 @@ onMounted(loadSkills)
                 : 'bg-white text-gray-700 hover:bg-gray-100'
             ]"
           >
-            Plugins ({{ pluginCount }})
+            Plugins ({{ pluginGroupCount }})
           </button>
         </div>
 
@@ -159,17 +205,55 @@ onMounted(loadSkills)
         No skills found
       </div>
 
-      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <SkillCard
-          v-for="skill in filteredSkills"
-          :key="skill.filePath"
-          :skill="skill"
-          @enable="handleEnable"
-          @disable="handleDisable"
-          @delete="handleDelete"
-          @enablePlugin="handleEnablePlugin"
-          @disablePlugin="handleDisablePlugin"
+      <!-- Plugin view: grouped by plugin -->
+      <div v-else-if="sourceFilter === 'plugin'" class="space-y-4">
+        <PluginGroup
+          v-for="(groupSkills, pluginName) in pluginGroups"
+          :key="pluginName"
+          :plugin-name="pluginName"
+          :skills="groupSkills"
+          @enable-plugin="handleEnablePlugin"
+          @disable-plugin="handleDisablePlugin"
+          @delete-plugin="handleDeletePlugin"
+          @enable-skill="handleEnablePluginSkill"
+          @disable-skill="handleDisablePluginSkill"
         />
+      </div>
+
+      <!-- User/All view: card grid -->
+      <div v-else class="space-y-6">
+        <!-- User skills -->
+        <div v-if="userSkills.length > 0">
+          <h2 v-if="sourceFilter === 'all'" class="text-lg font-semibold text-gray-700 mb-3">User Skills</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <SkillCard
+              v-for="skill in userSkills"
+              :key="skill.filePath"
+              :skill="skill"
+              @enable="handleEnable"
+              @disable="handleDisable"
+              @delete="handleDelete"
+            />
+          </div>
+        </div>
+
+        <!-- Plugin skills (when viewing "all") -->
+        <div v-if="sourceFilter === 'all' && Object.keys(pluginGroups).length > 0">
+          <h2 class="text-lg font-semibold text-gray-700 mb-3">Plugin Skills</h2>
+          <div class="space-y-4">
+            <PluginGroup
+              v-for="(groupSkills, pluginName) in pluginGroups"
+              :key="pluginName"
+              :plugin-name="pluginName"
+              :skills="groupSkills"
+              @enable-plugin="handleEnablePlugin"
+              @disable-plugin="handleDisablePlugin"
+              @delete-plugin="handleDeletePlugin"
+              @enable-skill="handleEnablePluginSkill"
+              @disable-skill="handleDisablePluginSkill"
+            />
+          </div>
+        </div>
       </div>
     </main>
 

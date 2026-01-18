@@ -70,3 +70,24 @@ export async function enablePluginSkill(pluginName: string, skillName: string): 
   })
   if (!res.ok) throw new Error('Failed to enable plugin skill')
 }
+
+export async function disablePlugin(pluginName: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/plugins/${pluginName}/disable`, {
+    method: 'POST'
+  })
+  if (!res.ok) throw new Error('Failed to disable plugin')
+}
+
+export async function enablePlugin(pluginName: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/plugins/${pluginName}/enable`, {
+    method: 'POST'
+  })
+  if (!res.ok) throw new Error('Failed to enable plugin')
+}
+
+export async function deletePlugin(pluginName: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/plugins/${pluginName}`, {
+    method: 'DELETE'
+  })
+  if (!res.ok) throw new Error('Failed to delete plugin')
+}
