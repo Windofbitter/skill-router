@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { Skill } from '../types/skill'
 import SkillCard from './SkillCard.vue'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   pluginName: string
@@ -45,7 +48,7 @@ const enabledCount = computed(() => props.skills.filter(s => s.enabled).length)
         <div>
           <h3 class="font-semibold text-purple-900">{{ pluginName }}</h3>
           <p class="text-xs text-purple-600">
-            {{ enabledCount }}/{{ skills.length }} skills enabled
+            {{ t('pluginGroup.skillsEnabled', { count: enabledCount, total: skills.length }) }}
           </p>
         </div>
       </div>
@@ -56,20 +59,20 @@ const enabledCount = computed(() => props.skills.filter(s => s.enabled).length)
           @click="emit('enablePlugin', pluginName)"
           class="px-3 py-1 text-sm bg-green-100 text-green-800 rounded hover:bg-green-200"
         >
-          Enable All
+          {{ t('pluginGroup.enableAll') }}
         </button>
         <button
           v-if="!allDisabled"
           @click="emit('disablePlugin', pluginName)"
           class="px-3 py-1 text-sm bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200"
         >
-          Disable All
+          {{ t('pluginGroup.disableAll') }}
         </button>
         <button
           @click="emit('deletePlugin', pluginName)"
           class="px-3 py-1 text-sm bg-red-100 text-red-800 rounded hover:bg-red-200"
         >
-          Remove
+          {{ t('pluginGroup.remove') }}
         </button>
       </div>
     </div>

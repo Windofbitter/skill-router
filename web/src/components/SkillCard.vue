@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import type { Skill } from '../types/skill'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   skill: Skill
@@ -30,7 +33,7 @@ const emit = defineEmits<{
           </span>
         </div>
         <p class="mt-1 text-sm text-gray-500 line-clamp-2">
-          {{ skill.description || 'No description' }}
+          {{ skill.description || t('skillCard.noDescription') }}
         </p>
       </div>
       <span
@@ -41,7 +44,7 @@ const emit = defineEmits<{
             : 'bg-gray-100 text-gray-800'
         ]"
       >
-        {{ skill.enabled ? 'Enabled' : 'Disabled' }}
+        {{ skill.enabled ? t('status.enabled') : t('status.disabled') }}
       </span>
     </div>
 
@@ -52,20 +55,20 @@ const emit = defineEmits<{
         @click="emit('disable', skill.fileName)"
         class="px-3 py-1 text-sm bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200"
       >
-        Disable
+        {{ t('skillCard.disable') }}
       </button>
       <button
         v-else
         @click="emit('enable', skill.fileName)"
         class="px-3 py-1 text-sm bg-green-100 text-green-800 rounded hover:bg-green-200"
       >
-        Enable
+        {{ t('skillCard.enable') }}
       </button>
       <button
         @click="emit('delete', skill.fileName, skill.enabled)"
         class="px-3 py-1 text-sm bg-red-100 text-red-800 rounded hover:bg-red-200"
       >
-        Delete
+        {{ t('skillCard.delete') }}
       </button>
     </div>
 
@@ -76,14 +79,14 @@ const emit = defineEmits<{
         @click="emit('disablePlugin', skill.pluginName, skill.fileName)"
         class="px-3 py-1 text-sm bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200"
       >
-        Disable
+        {{ t('skillCard.disable') }}
       </button>
       <button
         v-else
         @click="emit('enablePlugin', skill.pluginName, skill.fileName)"
         class="px-3 py-1 text-sm bg-green-100 text-green-800 rounded hover:bg-green-200"
       >
-        Enable
+        {{ t('skillCard.enable') }}
       </button>
     </div>
   </div>

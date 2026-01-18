@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { uploadSkill, installFromGithub } from '../api/skills'
+
+const { t } = useI18n()
 
 const emit = defineEmits<{
   close: []
@@ -18,7 +21,7 @@ async function handleFiles(files: FileList | null) {
 
   const file = files[0]!
   if (!file.name.endsWith('.md')) {
-    error.value = 'Only .md files are allowed'
+    error.value = t('errors.onlyMdAllowed')
     return
   }
 
@@ -30,7 +33,7 @@ async function handleFiles(files: FileList | null) {
     emit('added')
     emit('close')
   } catch (e) {
-    error.value = e instanceof Error ? e.message : 'Upload failed'
+    error.value = e instanceof Error ? e.message : t('errors.uploadFailed')
   } finally {
     loading.value = false
   }
@@ -45,13 +48,13 @@ async function handleGithubInstall() {
   try {
     const result = await installFromGithub(githubUrl.value)
     if (result.installed === 0) {
-      error.value = 'No skills found in repository'
+      error.value = t('errors.noSkillsInRepo')
     } else {
       emit('added')
       emit('close')
     }
   } catch (e) {
-    error.value = e instanceof Error ? e.message : 'Install failed'
+    error.value = e instanceof Error ? e.message : t('errors.installFailed')
   } finally {
     loading.value = false
   }
@@ -72,7 +75,7 @@ function onFileSelect(e: Event) {
   <div class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-xl font-bold">Add Skill</h2>
+        <h2 class="text-xl font-bold">{{ t('addModal.title') }}</h2>
         <button @click="emit('close')" class="text-gray-500 hover:text-gray-700 text-2xl">
           &times;
         </button>
@@ -86,7 +89,7 @@ function onFileSelect(e: Event) {
             tab === 'upload' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'
           ]"
         >
-          Upload File
+          {{ t('addModal.uploadFile') }}
         </button>
         <button
           @click="tab = 'github'"
@@ -95,7 +98,7 @@ function onFileSelect(e: Event) {
             tab === 'github' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'
           ]"
         >
-          From GitHub
+          {{ t('addModal.fromGithub') }}
         </button>
       </div>
 
@@ -109,10 +112,10 @@ function onFileSelect(e: Event) {
             dragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
           ]"
         >
-          <p class="text-gray-600 mb-2">Drag and drop a .md file here</p>
-          <p class="text-gray-400 text-sm mb-4">or</p>
+          <p class="text-gray-600 mb-2">{{ t('addModal.dragDrop') }}</p>
+          <p class="text-gray-400 text-sm mb-4">{{ t('addModal.or') }}</p>
           <label class="px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700">
-            Choose File
+            {{ t('addModal.chooseFile') }}
             <input type="file" accept=".md" class="hidden" @change="onFileSelect" />
           </label>
         </div>
@@ -122,23 +125,23 @@ function onFileSelect(e: Event) {
         <input
           v-model="githubUrl"
           type="text"
-          placeholder="https://github.com/user/repo"
+          :placeholder="t('addModal.githubPlaceholder')"
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
         <p class="mt-2 text-sm text-gray-500">
-          Will install all skills from .claude/commands/
+          {{ t('addModal.githubHelper') }}
         </p>
         <button
           @click="handleGithubInstall"
           :disabled="!githubUrl || loading"
           class="mt-4 w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
         >
-          Install
+          {{ t('addModal.install') }}
         </button>
       </div>
 
       <p v-if="error" class="mt-4 text-red-600 text-sm">{{ error }}</p>
-      <p v-if="loading" class="mt-4 text-gray-600 text-sm">Loading...</p>
+      <p v-if="loading" class="mt-4 text-gray-600 text-sm">{{ t('status.loading') }}</p>
     </div>
   </div>
 </template>
