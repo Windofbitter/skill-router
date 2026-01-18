@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/wind/skill-router/internal/model"
 	"github.com/wind/skill-router/internal/parser"
@@ -19,7 +18,7 @@ type SkillService struct {
 func NewSkillService(baseDir string) *SkillService {
 	return &SkillService{
 		baseDir:     baseDir,
-		enabledDir:  filepath.Join(baseDir, "commands"),
+		enabledDir:  filepath.Join(baseDir, "skills"),
 		disabledDir: filepath.Join(baseDir, "skills-disabled"),
 	}
 }
@@ -56,27 +55,35 @@ func (s *SkillService) scanDir(dir string, enabled bool) ([]model.Skill, error) 
 	}
 
 	for _, entry := range entries {
-		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".md") {
+		// Skills are directories containing SKILL.md
+		if !entry.IsDir() {
 			continue
 		}
 
-		filePath := filepath.Join(dir, entry.Name())
-		content, err := os.ReadFile(filePath)
+		skillDir := filepath.Join(dir, entry.Name())
+		skillFile := filepath.Join(skillDir, "SKILL.md")
+
+		content, err := os.ReadFile(skillFile)
 		if err != nil {
-			continue
+			// Try lowercase skill.md as fallback
+			skillFile = filepath.Join(skillDir, "skill.md")
+			content, err = os.ReadFile(skillFile)
+			if err != nil {
+				continue
+			}
 		}
 
 		fm, _ := parser.ParseFrontmatter(string(content))
 		name := fm.Name
 		if name == "" {
-			name = strings.TrimSuffix(entry.Name(), ".md")
+			name = entry.Name()
 		}
 
 		skills = append(skills, model.Skill{
 			Name:        name,
 			Description: fm.Description,
-			FileName:    entry.Name(),
-			FilePath:    filePath,
+			FileName:    entry.Name(), // Directory name
+			FilePath:    skillDir,
 			Enabled:     enabled,
 		})
 	}
@@ -84,9 +91,9 @@ func (s *SkillService) scanDir(dir string, enabled bool) ([]model.Skill, error) 
 	return skills, nil
 }
 
-func (s *SkillService) DisableSkill(fileName string) error {
-	src := filepath.Join(s.enabledDir, fileName)
-	dst := filepath.Join(s.disabledDir, fileName)
+func (s *SkillService) DisableSkill(dirName string) error {
+	src := filepath.Join(s.enabledDir, dirName)
+	dst := filepath.Join(s.disabledDir, dirName)
 
 	if err := os.MkdirAll(s.disabledDir, 0755); err != nil {
 		return err
@@ -95,9 +102,9 @@ func (s *SkillService) DisableSkill(fileName string) error {
 	return os.Rename(src, dst)
 }
 
-func (s *SkillService) EnableSkill(fileName string) error {
-	src := filepath.Join(s.disabledDir, fileName)
-	dst := filepath.Join(s.enabledDir, fileName)
+func (s *SkillService) EnableSkill(dirName string) error {
+	src := filepath.Join(s.disabledDir, dirName)
+	dst := filepath.Join(s.enabledDir, dirName)
 
 	if err := os.MkdirAll(s.enabledDir, 0755); err != nil {
 		return err
@@ -106,28 +113,35 @@ func (s *SkillService) EnableSkill(fileName string) error {
 	return os.Rename(src, dst)
 }
 
-func (s *SkillService) DeleteSkill(fileName string, enabled bool) error {
-	var filePath string
+func (s *SkillService) DeleteSkill(dirName string, enabled bool) error {
+	var dirPath string
 	if enabled {
-		filePath = filepath.Join(s.enabledDir, fileName)
+		dirPath = filepath.Join(s.enabledDir, dirName)
 	} else {
-		filePath = filepath.Join(s.disabledDir, fileName)
+		dirPath = filepath.Join(s.disabledDir, dirName)
 	}
-	return os.Remove(filePath)
+	return os.RemoveAll(dirPath)
 }
 
 func (s *SkillService) SaveSkill(fileName string, content []byte, overwrite bool) error {
-	filePath := filepath.Join(s.enabledDir, fileName)
+	// Extract skill name from filename (remove .md extension)
+	skillName := fileName
+	if len(skillName) > 3 && skillName[len(skillName)-3:] == ".md" {
+		skillName = skillName[:len(skillName)-3]
+	}
+
+	skillDir := filepath.Join(s.enabledDir, skillName)
+	skillFile := filepath.Join(skillDir, "SKILL.md")
 
 	if !overwrite {
-		if _, err := os.Stat(filePath); err == nil {
-			return fmt.Errorf("file already exists")
+		if _, err := os.Stat(skillDir); err == nil {
+			return fmt.Errorf("skill already exists")
 		}
 	}
 
-	if err := os.MkdirAll(s.enabledDir, 0755); err != nil {
+	if err := os.MkdirAll(skillDir, 0755); err != nil {
 		return err
 	}
 
-	return os.WriteFile(filePath, content, 0644)
+	return os.WriteFile(skillFile, content, 0644)
 }

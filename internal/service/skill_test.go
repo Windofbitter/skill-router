@@ -9,25 +9,27 @@ import (
 func TestListSkills(t *testing.T) {
 	// Create temp directory structure
 	tmpDir := t.TempDir()
-	enabledDir := filepath.Join(tmpDir, "commands")
+	enabledDir := filepath.Join(tmpDir, "skills")
 	disabledDir := filepath.Join(tmpDir, "skills-disabled")
-	os.MkdirAll(enabledDir, 0755)
-	os.MkdirAll(disabledDir, 0755)
 
-	// Create test skill files
+	// Create skill directories with SKILL.md files
+	skill1Dir := filepath.Join(enabledDir, "skill-one")
+	os.MkdirAll(skill1Dir, 0755)
 	skill1 := `---
 name: skill-one
 description: First skill
 ---
 Content`
-	os.WriteFile(filepath.Join(enabledDir, "skill-one.md"), []byte(skill1), 0644)
+	os.WriteFile(filepath.Join(skill1Dir, "SKILL.md"), []byte(skill1), 0644)
 
+	skill2Dir := filepath.Join(disabledDir, "skill-two")
+	os.MkdirAll(skill2Dir, 0755)
 	skill2 := `---
 name: skill-two
 description: Second skill (disabled)
 ---
 Content`
-	os.WriteFile(filepath.Join(disabledDir, "skill-two.md"), []byte(skill2), 0644)
+	os.WriteFile(filepath.Join(skill2Dir, "SKILL.md"), []byte(skill2), 0644)
 
 	svc := NewSkillService(tmpDir)
 	skills, err := svc.ListSkills()
@@ -60,81 +62,85 @@ Content`
 
 func TestDisableSkill(t *testing.T) {
 	tmpDir := t.TempDir()
-	enabledDir := filepath.Join(tmpDir, "commands")
+	enabledDir := filepath.Join(tmpDir, "skills")
 	disabledDir := filepath.Join(tmpDir, "skills-disabled")
-	os.MkdirAll(enabledDir, 0755)
-	os.MkdirAll(disabledDir, 0755)
 
+	// Create skill directory
+	skillDir := filepath.Join(enabledDir, "my-skill")
+	os.MkdirAll(skillDir, 0755)
 	skillContent := `---
 name: my-skill
 description: Test
 ---
 Content`
-	os.WriteFile(filepath.Join(enabledDir, "my-skill.md"), []byte(skillContent), 0644)
+	os.WriteFile(filepath.Join(skillDir, "SKILL.md"), []byte(skillContent), 0644)
 
 	svc := NewSkillService(tmpDir)
-	err := svc.DisableSkill("my-skill.md")
+	err := svc.DisableSkill("my-skill")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	// Verify file moved
-	if _, err := os.Stat(filepath.Join(enabledDir, "my-skill.md")); !os.IsNotExist(err) {
-		t.Error("file should be removed from enabled dir")
+	// Verify directory moved
+	if _, err := os.Stat(filepath.Join(enabledDir, "my-skill")); !os.IsNotExist(err) {
+		t.Error("skill should be removed from enabled dir")
 	}
-	if _, err := os.Stat(filepath.Join(disabledDir, "my-skill.md")); err != nil {
-		t.Error("file should exist in disabled dir")
+	if _, err := os.Stat(filepath.Join(disabledDir, "my-skill", "SKILL.md")); err != nil {
+		t.Error("skill should exist in disabled dir")
 	}
 }
 
 func TestEnableSkill(t *testing.T) {
 	tmpDir := t.TempDir()
-	enabledDir := filepath.Join(tmpDir, "commands")
+	enabledDir := filepath.Join(tmpDir, "skills")
 	disabledDir := filepath.Join(tmpDir, "skills-disabled")
-	os.MkdirAll(enabledDir, 0755)
-	os.MkdirAll(disabledDir, 0755)
 
+	// Create disabled skill directory
+	skillDir := filepath.Join(disabledDir, "my-skill")
+	os.MkdirAll(skillDir, 0755)
 	skillContent := `---
 name: my-skill
 description: Test
 ---
 Content`
-	os.WriteFile(filepath.Join(disabledDir, "my-skill.md"), []byte(skillContent), 0644)
+	os.WriteFile(filepath.Join(skillDir, "SKILL.md"), []byte(skillContent), 0644)
 
 	svc := NewSkillService(tmpDir)
-	err := svc.EnableSkill("my-skill.md")
+	err := svc.EnableSkill("my-skill")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	// Verify file moved
-	if _, err := os.Stat(filepath.Join(disabledDir, "my-skill.md")); !os.IsNotExist(err) {
-		t.Error("file should be removed from disabled dir")
+	// Verify directory moved
+	if _, err := os.Stat(filepath.Join(disabledDir, "my-skill")); !os.IsNotExist(err) {
+		t.Error("skill should be removed from disabled dir")
 	}
-	if _, err := os.Stat(filepath.Join(enabledDir, "my-skill.md")); err != nil {
-		t.Error("file should exist in enabled dir")
+	if _, err := os.Stat(filepath.Join(enabledDir, "my-skill", "SKILL.md")); err != nil {
+		t.Error("skill should exist in enabled dir")
 	}
 }
 
 func TestDeleteSkill(t *testing.T) {
 	tmpDir := t.TempDir()
-	enabledDir := filepath.Join(tmpDir, "commands")
-	os.MkdirAll(enabledDir, 0755)
+	enabledDir := filepath.Join(tmpDir, "skills")
 
+	// Create skill directory
+	skillDir := filepath.Join(enabledDir, "my-skill")
+	os.MkdirAll(skillDir, 0755)
 	skillContent := `---
 name: my-skill
 description: Test
 ---
 Content`
-	os.WriteFile(filepath.Join(enabledDir, "my-skill.md"), []byte(skillContent), 0644)
+	os.WriteFile(filepath.Join(skillDir, "SKILL.md"), []byte(skillContent), 0644)
 
 	svc := NewSkillService(tmpDir)
-	err := svc.DeleteSkill("my-skill.md", true)
+	err := svc.DeleteSkill("my-skill", true)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if _, err := os.Stat(filepath.Join(enabledDir, "my-skill.md")); !os.IsNotExist(err) {
-		t.Error("file should be deleted")
+	if _, err := os.Stat(filepath.Join(enabledDir, "my-skill")); !os.IsNotExist(err) {
+		t.Error("skill directory should be deleted")
 	}
 }
