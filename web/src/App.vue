@@ -7,6 +7,7 @@ import AddSkillModal from './components/AddSkillModal.vue'
 
 const skills = ref<Skill[]>([])
 const filter = ref<'all' | 'enabled' | 'disabled'>('all')
+const sourceFilter = ref<'all' | 'user' | 'plugin'>('all')
 const search = ref('')
 const loading = ref(true)
 const showAddModal = ref(false)
@@ -18,14 +19,22 @@ const filteredSkills = computed(() => {
       (filter.value === 'enabled' && skill.enabled) ||
       (filter.value === 'disabled' && !skill.enabled)
 
+    const matchesSource =
+      sourceFilter.value === 'all' ||
+      skill.source === sourceFilter.value
+
     const matchesSearch =
       !search.value ||
       skill.name.toLowerCase().includes(search.value.toLowerCase()) ||
-      skill.description?.toLowerCase().includes(search.value.toLowerCase())
+      skill.description?.toLowerCase().includes(search.value.toLowerCase()) ||
+      skill.pluginName?.toLowerCase().includes(search.value.toLowerCase())
 
-    return matchesFilter && matchesSearch
+    return matchesFilter && matchesSource && matchesSearch
   })
 })
+
+const userCount = computed(() => skills.value.filter(s => s.source === 'user').length)
+const pluginCount = computed(() => skills.value.filter(s => s.source === 'plugin').length)
 
 async function loadSkills() {
   loading.value = true
@@ -67,28 +76,69 @@ onMounted(loadSkills)
     </header>
 
     <main class="max-w-7xl mx-auto px-4 py-6">
-      <div class="flex flex-col sm:flex-row gap-4 mb-6">
+      <!-- Filters -->
+      <div class="flex flex-col gap-4 mb-6">
+        <!-- Source filter -->
         <div class="flex gap-2">
           <button
-            v-for="f in ['all', 'enabled', 'disabled'] as const"
-            :key="f"
-            @click="filter = f"
+            @click="sourceFilter = 'all'"
             :class="[
               'px-4 py-2 rounded-lg text-sm font-medium',
-              filter === f
-                ? 'bg-blue-600 text-white'
+              sourceFilter === 'all'
+                ? 'bg-gray-800 text-white'
                 : 'bg-white text-gray-700 hover:bg-gray-100'
             ]"
           >
-            {{ f === 'all' ? 'All' : f === 'enabled' ? 'Enabled' : 'Disabled' }}
+            All ({{ skills.length }})
+          </button>
+          <button
+            @click="sourceFilter = 'user'"
+            :class="[
+              'px-4 py-2 rounded-lg text-sm font-medium',
+              sourceFilter === 'user'
+                ? 'bg-gray-800 text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-100'
+            ]"
+          >
+            User ({{ userCount }})
+          </button>
+          <button
+            @click="sourceFilter = 'plugin'"
+            :class="[
+              'px-4 py-2 rounded-lg text-sm font-medium',
+              sourceFilter === 'plugin'
+                ? 'bg-purple-600 text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-100'
+            ]"
+          >
+            Plugins ({{ pluginCount }})
           </button>
         </div>
-        <input
-          v-model="search"
-          type="text"
-          placeholder="Search skills..."
-          class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        />
+
+        <!-- Status filter + search -->
+        <div class="flex flex-col sm:flex-row gap-4">
+          <div class="flex gap-2">
+            <button
+              v-for="f in ['all', 'enabled', 'disabled'] as const"
+              :key="f"
+              @click="filter = f"
+              :class="[
+                'px-4 py-2 rounded-lg text-sm font-medium',
+                filter === f
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white text-gray-700 hover:bg-gray-100'
+              ]"
+            >
+              {{ f === 'all' ? 'All' : f === 'enabled' ? 'Enabled' : 'Disabled' }}
+            </button>
+          </div>
+          <input
+            v-model="search"
+            type="text"
+            placeholder="Search skills..."
+            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
       </div>
 
       <div v-if="loading" class="text-center py-12 text-gray-500">

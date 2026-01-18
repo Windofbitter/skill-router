@@ -10,22 +10,32 @@ const emit = defineEmits<{
   disable: [fileName: string]
   delete: [fileName: string, enabled: boolean]
 }>()
+
+const isUserSkill = props.skill.source === 'user'
 </script>
 
 <template>
   <div class="bg-white rounded-lg shadow p-4 border border-gray-200">
     <div class="flex items-start justify-between">
       <div class="flex-1 min-w-0">
-        <h3 class="text-lg font-medium text-gray-900 truncate">
-          {{ skill.name }}
-        </h3>
+        <div class="flex items-center gap-2">
+          <h3 class="text-lg font-medium text-gray-900 truncate">
+            {{ skill.name }}
+          </h3>
+          <span
+            v-if="skill.source === 'plugin'"
+            class="px-2 py-0.5 text-xs font-medium rounded bg-purple-100 text-purple-800"
+          >
+            {{ skill.pluginName }}
+          </span>
+        </div>
         <p class="mt-1 text-sm text-gray-500 line-clamp-2">
           {{ skill.description || 'No description' }}
         </p>
       </div>
       <span
         :class="[
-          'ml-2 px-2 py-1 text-xs font-medium rounded-full',
+          'ml-2 px-2 py-1 text-xs font-medium rounded-full shrink-0',
           skill.enabled
             ? 'bg-green-100 text-green-800'
             : 'bg-gray-100 text-gray-800'
@@ -34,7 +44,9 @@ const emit = defineEmits<{
         {{ skill.enabled ? 'Enabled' : 'Disabled' }}
       </span>
     </div>
-    <div class="mt-4 flex gap-2">
+
+    <!-- Only show action buttons for user skills -->
+    <div v-if="isUserSkill" class="mt-4 flex gap-2">
       <button
         v-if="skill.enabled"
         @click="emit('disable', skill.fileName)"
@@ -55,6 +67,11 @@ const emit = defineEmits<{
       >
         Delete
       </button>
+    </div>
+
+    <!-- Show read-only notice for plugin skills -->
+    <div v-else class="mt-4 text-xs text-gray-400">
+      Managed by plugin
     </div>
   </div>
 </template>

@@ -4,4 +4,6 @@ export interface Skill {
   fileName: string
   filePath: string
   enabled: boolean
+  source: 'user' | 'plugin'
+  pluginName: string
 }
