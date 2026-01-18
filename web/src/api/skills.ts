@@ -28,3 +28,18 @@ export async function deleteSkill(fileName: string, enabled: boolean): Promise<v
   })
   if (!res.ok) throw new Error('Failed to delete skill')
 }
+
+export async function uploadSkill(file: File, overwrite: boolean = false): Promise<void> {
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('overwrite', String(overwrite))
+
+  const res = await fetch(`${API_BASE}/skills/upload`, {
+    method: 'POST',
+    body: formData
+  })
+  if (!res.ok) {
+    if (res.status === 409) throw new Error('File already exists')
+    throw new Error('Failed to upload skill')
+  }
+}

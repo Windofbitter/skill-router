@@ -3,11 +3,13 @@ import { ref, computed, onMounted } from 'vue'
 import type { Skill } from './types/skill'
 import { listSkills, enableSkill, disableSkill, deleteSkill } from './api/skills'
 import SkillCard from './components/SkillCard.vue'
+import AddSkillModal from './components/AddSkillModal.vue'
 
 const skills = ref<Skill[]>([])
 const filter = ref<'all' | 'enabled' | 'disabled'>('all')
 const search = ref('')
 const loading = ref(true)
+const showAddModal = ref(false)
 
 const filteredSkills = computed(() => {
   return skills.value.filter(skill => {
@@ -58,7 +60,7 @@ onMounted(loadSkills)
     <header class="bg-white shadow">
       <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
         <h1 class="text-2xl font-bold text-gray-900">Skill Router</h1>
-        <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+        <button @click="showAddModal = true" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
           + Add
         </button>
       </div>
@@ -108,5 +110,11 @@ onMounted(loadSkills)
         />
       </div>
     </main>
+
+    <AddSkillModal
+      v-if="showAddModal"
+      @close="showAddModal = false"
+      @added="loadSkills"
+    />
   </div>
 </template>

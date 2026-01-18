@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -113,4 +114,20 @@ func (s *SkillService) DeleteSkill(fileName string, enabled bool) error {
 		filePath = filepath.Join(s.disabledDir, fileName)
 	}
 	return os.Remove(filePath)
+}
+
+func (s *SkillService) SaveSkill(fileName string, content []byte, overwrite bool) error {
+	filePath := filepath.Join(s.enabledDir, fileName)
+
+	if !overwrite {
+		if _, err := os.Stat(filePath); err == nil {
+			return fmt.Errorf("file already exists")
+		}
+	}
+
+	if err := os.MkdirAll(s.enabledDir, 0755); err != nil {
+		return err
+	}
+
+	return os.WriteFile(filePath, content, 0644)
 }

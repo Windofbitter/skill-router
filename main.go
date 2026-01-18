@@ -26,6 +26,12 @@ func main() {
 		}
 	})
 
+	http.HandleFunc("/api/skills/upload", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "POST" {
+			h.Upload(w, r)
+		}
+	})
+
 	http.HandleFunc("/api/skills/", func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path
 		switch {
