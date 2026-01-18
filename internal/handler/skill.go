@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/wind/skill-router/internal/config"
 	"github.com/wind/skill-router/internal/github"
 	"github.com/wind/skill-router/internal/service"
 )
@@ -120,4 +121,46 @@ func (h *SkillHandler) Install(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]int{"installed": installed})
+}
+
+// Plugin skill handlers - these modify the override config file
+
+func (h *SkillHandler) DisablePluginSkill(w http.ResponseWriter, r *http.Request) {
+	// URL format: /api/plugins/{pluginName}/skills/{skillName}/disable
+	path := strings.TrimPrefix(r.URL.Path, "/api/plugins/")
+	parts := strings.Split(path, "/")
+	if len(parts) < 4 {
+		http.Error(w, "Invalid path", http.StatusBadRequest)
+		return
+	}
+
+	pluginName := parts[0]
+	skillName := parts[2]
+
+	if err := config.DisablePluginSkill(pluginName, skillName); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (h *SkillHandler) EnablePluginSkill(w http.ResponseWriter, r *http.Request) {
+	// URL format: /api/plugins/{pluginName}/skills/{skillName}/enable
+	path := strings.TrimPrefix(r.URL.Path, "/api/plugins/")
+	parts := strings.Split(path, "/")
+	if len(parts) < 4 {
+		http.Error(w, "Invalid path", http.StatusBadRequest)
+		return
+	}
+
+	pluginName := parts[0]
+	skillName := parts[2]
+
+	if err := config.EnablePluginSkill(pluginName, skillName); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }

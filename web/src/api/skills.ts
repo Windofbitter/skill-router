@@ -56,3 +56,17 @@ export async function installFromGithub(url: string): Promise<{ installed: numbe
   }
   return res.json()
 }
+
+export async function disablePluginSkill(pluginName: string, skillName: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/plugins/${pluginName}/skills/${skillName}/disable`, {
+    method: 'POST'
+  })
+  if (!res.ok) throw new Error('Failed to disable plugin skill')
+}
+
+export async function enablePluginSkill(pluginName: string, skillName: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/plugins/${pluginName}/skills/${skillName}/enable`, {
+    method: 'POST'
+  })
+  if (!res.ok) throw new Error('Failed to enable plugin skill')
+}

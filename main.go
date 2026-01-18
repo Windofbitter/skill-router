@@ -9,6 +9,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/wind/skill-router/internal/config"
 	"github.com/wind/skill-router/internal/handler"
 	"github.com/wind/skill-router/internal/service"
 )
@@ -17,6 +18,7 @@ func main() {
 	homeDir, _ := os.UserHomeDir()
 	claudeDir := filepath.Join(homeDir, ".claude")
 
+	config.Init(claudeDir)
 	svc := service.NewSkillService(claudeDir)
 	h := handler.NewSkillHandler(svc)
 
@@ -47,6 +49,19 @@ func main() {
 			h.Enable(w, r)
 		case r.Method == "DELETE":
 			h.Delete(w, r)
+		default:
+			http.NotFound(w, r)
+		}
+	})
+
+	// Plugin skill routes
+	http.HandleFunc("/api/plugins/", func(w http.ResponseWriter, r *http.Request) {
+		path := r.URL.Path
+		switch {
+		case strings.HasSuffix(path, "/disable") && r.Method == "POST":
+			h.DisablePluginSkill(w, r)
+		case strings.HasSuffix(path, "/enable") && r.Method == "POST":
+			h.EnablePluginSkill(w, r)
 		default:
 			http.NotFound(w, r)
 		}

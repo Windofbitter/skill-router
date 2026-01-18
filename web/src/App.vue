@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import type { Skill } from './types/skill'
-import { listSkills, enableSkill, disableSkill, deleteSkill } from './api/skills'
+import { listSkills, enableSkill, disableSkill, deleteSkill, enablePluginSkill, disablePluginSkill } from './api/skills'
 import SkillCard from './components/SkillCard.vue'
 import AddSkillModal from './components/AddSkillModal.vue'
 
@@ -58,6 +58,16 @@ async function handleDisable(fileName: string) {
 async function handleDelete(fileName: string, enabled: boolean) {
   if (!confirm(`Delete ${fileName}?`)) return
   await deleteSkill(fileName, enabled)
+  await loadSkills()
+}
+
+async function handleEnablePlugin(pluginName: string, skillName: string) {
+  await enablePluginSkill(pluginName, skillName)
+  await loadSkills()
+}
+
+async function handleDisablePlugin(pluginName: string, skillName: string) {
+  await disablePluginSkill(pluginName, skillName)
   await loadSkills()
 }
 
@@ -157,6 +167,8 @@ onMounted(loadSkills)
           @enable="handleEnable"
           @disable="handleDisable"
           @delete="handleDelete"
+          @enablePlugin="handleEnablePlugin"
+          @disablePlugin="handleDisablePlugin"
         />
       </div>
     </main>

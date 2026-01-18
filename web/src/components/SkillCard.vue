@@ -9,6 +9,8 @@ const emit = defineEmits<{
   enable: [fileName: string]
   disable: [fileName: string]
   delete: [fileName: string, enabled: boolean]
+  enablePlugin: [pluginName: string, skillName: string]
+  disablePlugin: [pluginName: string, skillName: string]
 }>()
 
 const isUserSkill = props.skill.source === 'user'
@@ -69,9 +71,23 @@ const isUserSkill = props.skill.source === 'user'
       </button>
     </div>
 
-    <!-- Show read-only notice for plugin skills -->
-    <div v-else class="mt-4 text-xs text-gray-400">
-      Managed by plugin
+    <!-- Plugin skills can be toggled but not deleted -->
+    <div v-else class="mt-4 flex items-center gap-2">
+      <button
+        v-if="skill.enabled"
+        @click="emit('disablePlugin', skill.pluginName, skill.fileName)"
+        class="px-3 py-1 text-sm bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200"
+      >
+        Disable
+      </button>
+      <button
+        v-else
+        @click="emit('enablePlugin', skill.pluginName, skill.fileName)"
+        class="px-3 py-1 text-sm bg-green-100 text-green-800 rounded hover:bg-green-200"
+      >
+        Enable
+      </button>
+      <span class="text-xs text-gray-400">from {{ skill.pluginName }}</span>
     </div>
   </div>
 </template>

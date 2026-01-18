@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/wind/skill-router/internal/config"
 	"github.com/wind/skill-router/internal/model"
 	"github.com/wind/skill-router/internal/parser"
 )
@@ -140,7 +141,7 @@ func (s *SkillService) scanPlugins() ([]model.Skill, error) {
 
 				skill := s.readSkillDir(filepath.Join(skillsPath, skillDir.Name()), skillDir.Name())
 				if skill != nil {
-					skill.Enabled = true // Plugin skills are always enabled
+					skill.Enabled = !config.IsPluginSkillDisabled(pluginName, skillDir.Name())
 					skill.Source = "plugin"
 					skill.PluginName = pluginName
 					skills = append(skills, *skill)
