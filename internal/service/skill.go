@@ -82,3 +82,35 @@ func (s *SkillService) scanDir(dir string, enabled bool) ([]model.Skill, error) 
 
 	return skills, nil
 }
+
+func (s *SkillService) DisableSkill(fileName string) error {
+	src := filepath.Join(s.enabledDir, fileName)
+	dst := filepath.Join(s.disabledDir, fileName)
+
+	if err := os.MkdirAll(s.disabledDir, 0755); err != nil {
+		return err
+	}
+
+	return os.Rename(src, dst)
+}
+
+func (s *SkillService) EnableSkill(fileName string) error {
+	src := filepath.Join(s.disabledDir, fileName)
+	dst := filepath.Join(s.enabledDir, fileName)
+
+	if err := os.MkdirAll(s.enabledDir, 0755); err != nil {
+		return err
+	}
+
+	return os.Rename(src, dst)
+}
+
+func (s *SkillService) DeleteSkill(fileName string, enabled bool) error {
+	var filePath string
+	if enabled {
+		filePath = filepath.Join(s.enabledDir, fileName)
+	} else {
+		filePath = filepath.Join(s.disabledDir, fileName)
+	}
+	return os.Remove(filePath)
+}
