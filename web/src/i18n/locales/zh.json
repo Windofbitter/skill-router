@@ -1,0 +1,71 @@
+{
+  "header": {
+    "title": "技能路由",
+    "add": "+ 添加"
+  },
+  "filters": {
+    "all": "全部",
+    "user": "用户",
+    "plugins": "插件",
+    "enabled": "已启用",
+    "disabled": "已禁用",
+    "searchPlaceholder": "搜索技能..."
+  },
+  "status": {
+    "loading": "加载中...",
+    "noSkills": "未找到技能",
+    "enabled": "已启用",
+    "disabled": "已禁用"
+  },
+  "sections": {
+    "userSkills": "用户技能",
+    "pluginSkills": "插件技能"
+  },
+  "skillCard": {
+    "noDescription": "暂无描述",
+    "enable": "启用",
+    "disable": "禁用",
+    "delete": "删除"
+  },
+  "pluginGroup": {
+    "skillsEnabled": "{count}/{total} 个技能已启用",
+    "enableAll": "全部启用",
+    "disableAll": "全部禁用",
+    "remove": "移除"
+  },
+  "addModal": {
+    "title": "添加技能",
+    "uploadFile": "上传文件",
+    "fromGithub": "从 GitHub",
+    "dragDrop": "拖放 .md 文件到此处",
+    "or": "或",
+    "chooseFile": "选择文件",
+    "githubPlaceholder": "https://github.com/user/repo",
+    "githubHelper": "将从 .claude/commands/ 安装所有技能",
+    "install": "安装"
+  },
+  "confirm": {
+    "deleteSkill": "删除 {fileName}？",
+    "removePlugin": "移除插件 \"{pluginName}\"？这将从缓存中删除其所有技能。"
+  },
+  "errors": {
+    "fetchFailed": "获取技能失败",
+    "disableFailed": "禁用技能失败",
+    "enableFailed": "启用技能失败",
+    "deleteFailed": "删除技能失败",
+    "fileExists": "文件已存在",
+    "uploadFailed": "上传技能失败",
+    "installFailed": "安装技能失败",
+    "disablePluginSkillFailed": "禁用插件技能失败",
+    "enablePluginSkillFailed": "启用插件技能失败",
+    "disablePluginFailed": "禁用插件失败",
+    "enablePluginFailed": "启用插件失败",
+    "deletePluginFailed": "删除插件失败",
+    "onlyMdAllowed": "仅允许 .md 文件",
+    "noSkillsInRepo": "仓库中未找到技能"
+  },
+  "language": {
+    "en": "EN",
+    "zh": "中"
+  }
+}

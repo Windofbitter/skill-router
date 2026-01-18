@@ -1,0 +1,71 @@
+{
+  "header": {
+    "title": "Skill Router",
+    "add": "+ Add"
+  },
+  "filters": {
+    "all": "All",
+    "user": "User",
+    "plugins": "Plugins",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "searchPlaceholder": "Search skills..."
+  },
+  "status": {
+    "loading": "Loading...",
+    "noSkills": "No skills found",
+    "enabled": "Enabled",
+    "disabled": "Disabled"
+  },
+  "sections": {
+    "userSkills": "User Skills",
+    "pluginSkills": "Plugin Skills"
+  },
+  "skillCard": {
+    "noDescription": "No description",
+    "enable": "Enable",
+    "disable": "Disable",
+    "delete": "Delete"
+  },
+  "pluginGroup": {
+    "skillsEnabled": "{count}/{total} skills enabled",
+    "enableAll": "Enable All",
+    "disableAll": "Disable All",
+    "remove": "Remove"
+  },
+  "addModal": {
+    "title": "Add Skill",
+    "uploadFile": "Upload File",
+    "fromGithub": "From GitHub",
+    "dragDrop": "Drag and drop a .md file here",
+    "or": "or",
+    "chooseFile": "Choose File",
+    "githubPlaceholder": "https://github.com/user/repo",
+    "githubHelper": "Will install all skills from .claude/commands/",
+    "install": "Install"
+  },
+  "confirm": {
+    "deleteSkill": "Delete {fileName}?",
+    "removePlugin": "Remove plugin \"{pluginName}\"? This will delete all its skills from the cache."
+  },
+  "errors": {
+    "fetchFailed": "Failed to fetch skills",
+    "disableFailed": "Failed to disable skill",
+    "enableFailed": "Failed to enable skill",
+    "deleteFailed": "Failed to delete skill",
+    "fileExists": "File already exists",
+    "uploadFailed": "Failed to upload skill",
+    "installFailed": "Failed to install skills",
+    "disablePluginSkillFailed": "Failed to disable plugin skill",
+    "enablePluginSkillFailed": "Failed to enable plugin skill",
+    "disablePluginFailed": "Failed to disable plugin",
+    "enablePluginFailed": "Failed to enable plugin",
+    "deletePluginFailed": "Failed to delete plugin",
+    "onlyMdAllowed": "Only .md files are allowed",
+    "noSkillsInRepo": "No skills found in repository"
+  },
+  "language": {
+    "en": "EN",
+    "zh": "中"
+  }
+}
