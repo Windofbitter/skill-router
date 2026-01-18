@@ -1,0 +1,84 @@
+package service
+
+import (
+	"os"
+	"path/filepath"
+	"strings"
+
+	"github.com/wind/skill-router/internal/model"
+	"github.com/wind/skill-router/internal/parser"
+)
+
+type SkillService struct {
+	baseDir     string
+	enabledDir  string
+	disabledDir string
+}
+
+func NewSkillService(baseDir string) *SkillService {
+	return &SkillService{
+		baseDir:     baseDir,
+		enabledDir:  filepath.Join(baseDir, "commands"),
+		disabledDir: filepath.Join(baseDir, "skills-disabled"),
+	}
+}
+
+func (s *SkillService) ListSkills() ([]model.Skill, error) {
+	var skills []model.Skill
+
+	// Scan enabled skills
+	enabledSkills, err := s.scanDir(s.enabledDir, true)
+	if err != nil {
+		return nil, err
+	}
+	skills = append(skills, enabledSkills...)
+
+	// Scan disabled skills
+	disabledSkills, err := s.scanDir(s.disabledDir, false)
+	if err != nil {
+		return nil, err
+	}
+	skills = append(skills, disabledSkills...)
+
+	return skills, nil
+}
+
+func (s *SkillService) scanDir(dir string, enabled bool) ([]model.Skill, error) {
+	var skills []model.Skill
+
+	entries, err := os.ReadDir(dir)
+	if os.IsNotExist(err) {
+		return skills, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".md") {
+			continue
+		}
+
+		filePath := filepath.Join(dir, entry.Name())
+		content, err := os.ReadFile(filePath)
+		if err != nil {
+			continue
+		}
+
+		fm, _ := parser.ParseFrontmatter(string(content))
+		name := fm.Name
+		if name == "" {
+			name = strings.TrimSuffix(entry.Name(), ".md")
+		}
+
+		skills = append(skills, model.Skill{
+			Name:        name,
+			Description: fm.Description,
+			FileName:    entry.Name(),
+			FilePath:    filePath,
+			Enabled:     enabled,
+		})
+	}
+
+	return skills, nil
+}
