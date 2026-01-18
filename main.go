@@ -52,6 +52,27 @@ func main() {
 		}
 	})
 
+	// Serve static files
+	fileServer := http.FileServer(getFileSystem())
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		// Try to serve the file
+		path := r.URL.Path
+		if path == "/" {
+			path = "/index.html"
+		}
+
+		// Check if file exists in embedded FS
+		if f, err := webFS.Open("web/dist" + path); err == nil {
+			f.Close()
+			fileServer.ServeHTTP(w, r)
+			return
+		}
+
+		// Fallback to index.html for SPA routing
+		r.URL.Path = "/"
+		fileServer.ServeHTTP(w, r)
+	})
+
 	addr := ":9527"
 	url := "http://localhost" + addr
 
