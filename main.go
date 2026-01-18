@@ -32,6 +32,12 @@ func main() {
 		}
 	})
 
+	http.HandleFunc("/api/skills/install", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "POST" {
+			h.Install(w, r)
+		}
+	})
+
 	http.HandleFunc("/api/skills/", func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path
 		switch {

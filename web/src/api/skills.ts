@@ -43,3 +43,16 @@ export async function uploadSkill(file: File, overwrite: boolean = false): Promi
     throw new Error('Failed to upload skill')
   }
 }
+
+export async function installFromGithub(url: string): Promise<{ installed: number }> {
+  const res = await fetch(`${API_BASE}/skills/install`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ url })
+  })
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(text || 'Failed to install skills')
+  }
+  return res.json()
+}

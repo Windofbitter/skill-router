@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/wind/skill-router/internal/github"
 	"github.com/wind/skill-router/internal/service"
 )
 
@@ -86,4 +87,37 @@ func (h *SkillHandler) Upload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
+}
+
+type InstallRequest struct {
+	URL string `json:"url"`
+}
+
+func (h *SkillHandler) Install(w http.ResponseWriter, r *http.Request) {
+	var req InstallRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	files, err := github.FetchSkillFiles(req.URL)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	installed := 0
+	for _, f := range files {
+		content, err := github.DownloadFile(f.DownloadURL)
+		if err != nil {
+			continue
+		}
+		if err := h.svc.SaveSkill(f.Name, content, false); err != nil {
+			continue
+		}
+		installed++
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]int{"installed": installed})
 }
