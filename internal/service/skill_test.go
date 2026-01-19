@@ -144,3 +144,26 @@ Content`
 		t.Error("skill directory should be deleted")
 	}
 }
+
+func TestSaveSkill_WritesSkillBundle(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	content := []byte(`---
+name: my-skill
+description: Test
+---
+Content`)
+
+	svc := NewSkillService(tmpDir)
+	if err := svc.SaveSkill("my-skill", content, false); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	got, err := os.ReadFile(filepath.Join(tmpDir, "skills", "my-skill", "SKILL.md"))
+	if err != nil {
+		t.Fatalf("expected skill to be saved under skills/my-skill/SKILL.md: %v", err)
+	}
+	if string(got) != string(content) {
+		t.Fatalf("unexpected saved content: %q", string(got))
+	}
+}

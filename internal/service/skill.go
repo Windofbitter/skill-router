@@ -212,13 +212,8 @@ func (s *SkillService) DeleteSkill(dirName string, enabled bool) error {
 	return os.RemoveAll(dirPath)
 }
 
-func (s *SkillService) SaveSkill(fileName string, content []byte, overwrite bool) error {
-	skillName := fileName
-	if len(skillName) > 3 && skillName[len(skillName)-3:] == ".md" {
-		skillName = skillName[:len(skillName)-3]
-	}
-
-	skillDir := filepath.Join(s.enabledDir, skillName)
+func (s *SkillService) SaveSkill(skillDirName string, content []byte, overwrite bool) error {
+	skillDir := filepath.Join(s.enabledDir, skillDirName)
 	skillFile := filepath.Join(skillDir, "SKILL.md")
 
 	if !overwrite {

@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"path/filepath"
 	"strings"
 
 	"github.com/wind/skill-router/internal/config"
 	"github.com/wind/skill-router/internal/github"
+	"github.com/wind/skill-router/internal/parser"
 	"github.com/wind/skill-router/internal/service"
 )
 
@@ -82,7 +84,14 @@ func (h *SkillHandler) Upload(w http.ResponseWriter, r *http.Request) {
 
 	overwrite := r.FormValue("overwrite") == "true"
 
-	if err := h.svc.SaveSkill(header.Filename, content, overwrite); err != nil {
+	fm, _ := parser.ParseFrontmatter(string(content))
+	skillDir := strings.TrimSpace(fm.Name)
+	if skillDir == "" {
+		base := filepath.Base(header.Filename)
+		skillDir = strings.TrimSuffix(base, filepath.Ext(base))
+	}
+
+	if err := h.svc.SaveSkill(skillDir, content, overwrite); err != nil {
 		http.Error(w, err.Error(), http.StatusConflict)
 		return
 	}
