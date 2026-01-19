@@ -2,6 +2,8 @@
 
 ## 概述
 
+NOTE: This document contains some legacy references (e.g. `~/.claude/commands/`) from the earlier Commands-based layout. The project is transitioning to Skills bundles under `~/.claude/skills/<dir>/SKILL.md`.
+
 一个本地 Web 应用，帮助用户可视化管理 Claude Code 的 skills。
 
 ## 核心功能

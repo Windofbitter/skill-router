@@ -6,7 +6,7 @@ A local web application to manage Claude Code skills and plugins.
 
 ## Features
 
-- **View all skills** from `~/.claude/commands/` and installed plugins
+- **View all skills** from `~/.claude/skills/` and installed plugins
 - **Enable/disable skills** individually or by plugin group
 - **Delete skills** (user skills only)
 - **Upload .md skill files** via drag-and-drop or file picker
@@ -36,7 +36,7 @@ This starts the server and opens your browser to http://localhost:9527
 Click the **+ Add** button to:
 
 1. **Upload a file** - Drag and drop or select a `.md` skill file
-2. **Install from GitHub** - Enter a repository URL to install all skills from `.claude/commands/`
+2. **Install from GitHub** - Enter a repository URL to install skills from `skills/` or `.claude/skills/`
 
 ![Add Skill Modal](docs/images/add-skill-modal.png)
 
