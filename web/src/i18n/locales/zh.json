@@ -41,7 +41,7 @@
     "or": "或",
     "chooseFile": "选择文件",
     "githubPlaceholder": "https://github.com/user/repo",
-    "githubHelper": "将从 .claude/commands/ 安装所有技能",
+    "githubHelper": "将从 skills/ 或 .claude/skills/ 安装技能",
     "install": "安装"
   },
   "confirm": {

@@ -41,7 +41,7 @@
     "or": "or",
     "chooseFile": "Choose File",
     "githubPlaceholder": "https://github.com/user/repo",
-    "githubHelper": "Will install all skills from .claude/commands/",
+    "githubHelper": "Will install skills from skills/ or .claude/skills/",
     "install": "Install"
   },
   "confirm": {
